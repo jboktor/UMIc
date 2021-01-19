@@ -33,12 +33,12 @@ The framework consists of three scripts:
 - ```casesWorkflows.R```
 - ```functions.R```
 
-In order to run the project, use the following command:
+In order to run the project, set the [R](https://github.com/BiodataAnalysisGroup/UMIc/tree/master/R) folder as the working directoryand then use the following command:
 ```
 source("UMIsProject.R")
 ```
 
-The project provides example input datasets and their outputs, for testing purposes. The folder [data](https://github.com/BiodataAnalysisGroup/UMIc/tree/master/data) includes example datasets for all three scenarios in their corresponding subfolders. Each subfolder icludes the fastq files and a Readme.md file with the parameter values, used to generate the files in folder [outputs](https://github.com/BiodataAnalysisGroup/UMIc/tree/master/outputs).
+The project provides example input datasets and their outputs, for testing purposes. The folder [data](https://github.com/BiodataAnalysisGroup/UMIc/tree/master/data) includes example datasets for all three scenarios in their corresponding subfolders. Each subfolder icludes the fastq files and a Readme.md file with the parameter values, used to generate the files in folder [outputs](https://github.com/BiodataAnalysisGroup/UMIc/tree/master/outputs). The user must provide the input and output folders' filepaths. 
 
 ### Inputs
 Before running the project, the user must set the appropriate input parameters in the main script ```UMIsProject.R```.
