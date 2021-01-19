@@ -16,8 +16,4 @@ countsCutoff <- 5
 UMIdistance <- 1
 
 sequenceDistance <- 3
-
-inputsFolder <- "data/case1"
-
-outputsFolder <- "UMIc_output_case1"
 ```
