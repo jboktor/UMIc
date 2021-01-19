@@ -10,7 +10,7 @@ The packages needed to be installed, in order to run the project are:
 - from CRAN
 
 ```
-install.packages(c("tidyverse", "data.table", "stringr"))
+install.packages(c("tidyverse", "data.table", "stringr", "stringdist"))
 ```
 
 - from Bioconductor
@@ -23,7 +23,7 @@ BiocManager::install(c("Biostrings", "ShortRead"))
 The project can be downloaded using git:
 
 ```
-git clone https://github.com/mcmaniou/projectUMIs
+git clone https://github.com/BiodataAnalysisGroup/UMIc
 ```
 
 ### Running the project
@@ -37,6 +37,8 @@ In order to run the project, use the following command:
 ```
 source("UMIsProject.R")
 ```
+
+The project provides example input datasets and their outputs, for testing purposes. The folder [data](https://github.com/BiodataAnalysisGroup/UMIc/tree/master/data) includes example datasets for all three scenarios in their corresponding subfolders. Each subfolder icludes the fastq files and a Readme.md file with the parameter values, used to generate the files in folder [outputs](https://github.com/BiodataAnalysisGroup/UMIc/tree/master/outputs).
 
 ### Inputs
 Before running the project, the user must set the appropriate input parameters in the main script ```UMIsProject.R```.
@@ -60,7 +62,7 @@ The output data are stored also in fastq files, named the same as the input file
 
 The framework also produces a csv file with all the information of the output fastq files and extra information, that can help return from the output sequences to their corresponding input sequences. The file is named the same as the Read1 fastq file with an added ```_summary_table``` suffix.
 
-For more details, please refer to the wiki [Running the project](https://github.com/mcmaniou/projectUMIs/wiki/Running-the-project) page.
+For more details, please refer to the [wiki](https://github.com/BiodataAnalysisGroup/UMIc/wiki).
 
 
 ## License
