@@ -1,5 +1,10 @@
-pairedR1 <- function(filepath1, filepath2, outputsFolder, 
-                     UMIlength, UMIdistance, sequenceLength, sequenceDistance,
+pairedR1 <- function(filepath1, 
+                     filepath2, 
+                     outputsFolder, 
+                     UMIlength, 
+                     UMIdistance, 
+                     sequenceLength, 
+                     sequenceDistance,
                      countsCutoff){
   
   #read input files
@@ -131,47 +136,52 @@ pairedR1 <- function(filepath1, filepath2, outputsFolder,
   
 }
 
-
-pairedR1R2 <- function(filepath1, filepath2, outputsFolder, 
-                       UMIlength, UMIdistance, sequenceLength, sequenceDistance,
+pairedR1R2 <- function(filepath1, 
+                       filepath2, 
+                       outputsFolder, 
+                       UMIlength, 
+                       UMIdistance, 
+                       sequenceLength, 
+                       sequenceDistance,
                        countsCutoff){
-  #read input files
-  reads1 <- readFastq(filepath1)
-  reads2 <- readFastq(filepath2)
+  # read input files
+  reads1 <- ShortRead::readFastq(filepath1)
+  reads2 <- ShortRead::readFastq(filepath2)
   
-  #reads1 <- reads1[1:1000]
-  #reads2 <- reads2[1:1000]
+   reads1 <- reads1[1:1000]
+   reads2 <- reads2[1:1000]
 
-  #File 1
-  seq <- as.data.table(sread(reads1))
-  ids <- as.data.table(reads1@id)
+  # File 1
+  seq <- data.table::as.data.table(ShortRead::sread(reads1))
+  ids <- data.table::as.data.table(reads1@id)
   
-  full <- cbind(seq, ids)
+  full <- base::cbind(seq, ids)
   names(full) <- c("seq", "id")
  
-  #separate UMI and read
-  full$UMI <- substring(full$seq, 1, UMIlength)
-  full$read <- substring(full$seq, UMIlength+1, sequenceLength)
+  # separate UMI and read
+  full$UMI <- base::substring(full$seq, 1, UMIlength)
+  full$read <- base::substring(full$seq, UMIlength + 1, sequenceLength)
   
-  #File 2
-  seq2 <- as.data.table(sread(reads2))
-  ids2 <- as.data.table(reads2@id)
+  # File 2
+  seq2 <- data.table::as.data.table(ShortRead::sread(reads2))
+  ids2 <- data.table::as.data.table(reads2@id)
   
   full2 <- cbind(seq2, ids2)
   names(full2) <- c("seq", "id")
   
-  #separate UMI and read
-  full2$UMI <- substring(full2$seq, 1, UMIlength)
-  full2$read <- substring(full2$seq, UMIlength+1, sequenceLength)
+  # separate UMI and read
+  full2$UMI <- base::substring(full2$seq, 1, UMIlength)
+  full2$read <- base::substring(full2$seq, UMIlength + 1, sequenceLength)
   
-  #keep the information of the read2 UMI, in the read1 also
+  # keep the information of the read2 UMI, in the read1 also
   full$UMI12 <- paste0(full$UMI, full2$UMI)
   
-  #keep intermediate information 
-  partIDs <- as.data.table(cbind(UMI12 = full$UMI12, ID1 = full$id, ID2 = full2$id))
+  # keep intermediate information 
+  partIDs <- data.table::as.data.table(cbind(UMI12 = full$UMI12, 
+                                             ID1 = full$id, 
+                                             ID2 = full2$id))
   
-  intermediate.table <- partIDs[,.(count = .N), by = UMI12,]
-  intermediate.table <- intermediate.table[which(intermediate.table$count >= countsCutoff),]
+  intermediate.table <- partIDs[,.(count = .N), by = UMI12]
   
   partIDs <- partIDs[!duplicated(UMI12),]
   partIDs <- partIDs[order(partIDs$UMI12, decreasing = TRUE), ]
@@ -180,83 +190,125 @@ pairedR1R2 <- function(filepath1, filepath2, outputsFolder,
   intermediate.table$ID1 <- partIDs$ID1
   intermediate.table$ID2 <- partIDs$ID2
   
+  intermediate.table <- intermediate.table[which(intermediate.table$count >= countsCutoff), ]
+  
   rm(partIDs)
   
-  #data preparation
-  full <- separate(full, id, c("id1", "id2"), " ", remove = T)
-  full <- select(full, read, id1, UMI, UMI12)
+  # data preparation
+  full <- tidyr::separate(full, id, c("id1", "id2"), " ", remove = T)
+  full <- dplyr::select(full, read, id1, UMI, UMI12)
   colnames(full) <- c("read", "id", "UMI", "UMI12")
     
-  quality <- as(quality(reads1), "matrix")
-  quality = as.data.table(quality)
-  quality = quality[,(UMIlength+1):sequenceLength]
+  quality <- as(Biostrings::quality(reads1), "matrix")
+  quality <- as.data.table(quality)
+  quality <- quality[,(UMIlength + 1):sequenceLength]
   quality$id <- full$id
   
-  #File2
-  full2 <- separate(full2, id, c("id1", "id2"), " ", remove = T)
-  full2 <- select(full2, read, id1, UMI)
+  # File2
+  full2 <- tidyr::separate(full2, id, c("id1", "id2"), " ", remove = T)
+  full2 <- dplyr::select(full2, read, id1, UMI)
   colnames(full2) <- c("read", "id", "UMI")
   
-  quality2 <- as(quality(reads2), "matrix")
-  quality2 = as.data.table(quality2)
-  quality2 = quality2[,(UMIlength+1):sequenceLength]
+  quality2 <- as(Biostrings::quality(reads2), "matrix")
+  quality2 <- as.data.table(quality2)
+  quality2 <- quality2[,(UMIlength+1):sequenceLength]
   quality2$id <- full2$id
   
   rm(ids, ids2, seq, seq2, reads1, reads2)
   
-  #first consensus for each unique pair
+  # first consensus for each unique pair
   
-  result_mean = list()
+  # result_mean = list()
   
-  for(i in c(1:nrow(intermediate.table))){
-    
-    result_mean[[i]] = groupingPairedR1R2(intermediate.table$count[i], full, quality, full2, quality2, intermediate.table$UMI12[i])
-    
-  }
+  cat("step 1\n")
   
-  result_mean <- bind_rows(result_mean)
+  result_mean = groupingPairedR1R2(intermediate.table, 
+                                   full,
+                                   quality,
+                                   full2,
+                                   quality2)
   
-  #UMI correction
-  #checks both UMI1 and UMI2
-  newUMIs <- UMIcorrectionPairedR1R2(intermediate.table,result_mean,sequenceDistance, UMIdistance, UMIlength)
+  
+  
+  # for(i in 1:nrow(intermediate.table)){
+  #   
+  #   result_mean[[i]] = groupingPairedR1R2(intermediate.table$count[i], 
+  #                                         full, 
+  #                                         quality, 
+  #                                         full2, 
+  #                                         quality2, 
+  #                                         intermediate.table$UMI12[i])
+  #   
+  # }
+  
+  # result_mean <- bind_rows(result_mean)
+  
+  # UMI correction
+  # checks both UMI1 and UMI2
+  
+  cat("step 2\n")
+  
+  newUMIs <- UMIcorrectionPairedR1R2(intermediate.table,
+                                     result_mean,
+                                     sequenceDistance, 
+                                     UMIdistance, 
+                                     UMIlength)
+  
   rm(intermediate.table)
   
-  #final consensus
-  consensus_mean = list()
+  # final consensus
   
-  for(i in c(1:nrow(newUMIs))){
-    
-    consensus_mean[[i]] = groupingFinalPairedR1R2(newUMIs$UMI[i], full, quality, full2, quality2,result_mean, UMIlength)
-    
-  }
+  cat("step 3\n")
   
-  consensus_mean <- bind_rows(consensus_mean)
+  consensus_mean = groupingFinalPairedR1R2(newUMIs,
+                                           full,
+                                           quality,
+                                           full2, 
+                                           quality2,
+                                           result_mean,
+                                           UMIlength)
   
-  #produce Outputs 
+  # consensus_mean = list()
+  # 
+  # for(i in c(1:nrow(newUMIs))){
+  #   
+  #   consensus_mean[[i]] = groupingFinalPairedR1R2(newUMIs$UMI[i], 
+  #                                                 full, 
+  #                                                 quality, 
+  #                                                 full2, 
+  #                                                 quality2,
+  #                                                 result_mean, 
+  #                                                 UMIlength)
+  #   
+  # }
+  # 
+  # consensus_mean <- bind_rows(consensus_mean)
   
-  dir.create(outputsFolder)
+  # produce Outputs 
   
-  #File1
+  dir.create(outputsFolder, showWarnings = FALSE)
+  
+  # File1
   file <- ShortReadQ(DNAStringSet(consensus_mean$read1), 
                      FastqQuality(consensus_mean$quality1),
-                     BStringSet(paste0(newUMIs$ID1," ",substring(consensus_mean$UMI, 1,UMIlength))))
+                     BStringSet(paste0(newUMIs$ID1, " ", substring(consensus_mean$UMI, 1, UMIlength))))
   
   
-  fileSplit <- as.data.table(str_split(filepath1,"\\/"))
-  fileSplit <- as.data.table(str_split(fileSplit[nrow(fileSplit)],"\\."))
-  output <- paste0(outputsFolder,"/", fileSplit[1], "_corrected.fastq.gz")
+  fileSplit <- as.data.table(str_split(filepath1, "\\/"))
+  fileSplit <- as.data.table(str_split(fileSplit[nrow(fileSplit)], "\\."))
+  output <- paste0(outputsFolder, "/", fileSplit[1], "_corrected.fastq.gz")
   part <- fileSplit[1]
   file.create(output)
   writeFastq(file, output, mode = "a")
   
-  #File2
+  # File2
   file <- ShortReadQ(DNAStringSet(consensus_mean$read2), 
                      FastqQuality(consensus_mean$quality2),
-                     BStringSet(paste0(newUMIs$ID2," ",substring(consensus_mean$UMI, UMIlength+1, 2*UMIlength))))
+                     BStringSet(paste0(newUMIs$ID2, " ", substring(consensus_mean$UMI, UMIlength + 1, 2 * UMIlength))))
   
-  fileSplit <- as.data.table(str_split(filepath2,"\\/"))
+  fileSplit <- as.data.table(str_split(filepath2, "\\/"))
   fileSplit <- as.data.table(str_split(fileSplit[nrow(fileSplit)],"\\."))
-  output <- paste0(outputsFolder,"/", fileSplit[1], "_corrected.fastq.gz")
+  output <- paste0(outputsFolder, "/", fileSplit[1], "_corrected.fastq.gz")
   file.create(output)
   writeFastq(file, output, mode = "a")
   
@@ -267,17 +319,21 @@ pairedR1R2 <- function(filepath1, filepath2, outputsFolder,
                                     quality1 = consensus_mean$quality1,
                                     read2 = consensus_mean$read2,
                                     quality2 = consensus_mean$quality2,
-                                    ID1 = paste0(newUMIs$ID1," ",substring(consensus_mean$UMI, 1,UMIlength)),
-                                    ID2 = paste0(newUMIs$ID2," ",substring(consensus_mean$UMI, UMIlength+1, 2*UMIlength))))
+                                    ID1 = paste0(newUMIs$ID1, " ", substring(consensus_mean$UMI, 1, UMIlength)),
+                                    ID2 = paste0(newUMIs$ID2, " ", substring(consensus_mean$UMI, UMIlength + 1, 2 * UMIlength))))
   
-   write.table(output.csv,paste0(outputsFolder,"/",part,"_summary_table.csv"), sep ="\t", row.names = F)
+   write.table(output.csv,paste0(outputsFolder, "/", part, "_summary_table.csv"), sep = "\t", row.names = F)
   
-  remove(part,file, output, fileSplit, output.csv)
+  remove(part, file, output, fileSplit, output.csv)
   
 }
 
-single <- function(filepath1, outputsFolder, 
-                   UMIlength, UMIdistance, sequenceLength, sequenceDistance,
+single <- function(filepath1, 
+                   outputsFolder, 
+                   UMIlength, 
+                   UMIdistance, 
+                   sequenceLength, 
+                   sequenceDistance,
                    countsCutoff){
   
   #read input file

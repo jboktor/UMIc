@@ -2,11 +2,13 @@
 library(tidyverse)
 library(data.table)
 library(ShortRead)
-library(stringr)
 library(Biostrings)
+library(stringdist)
 
-source("casesWorkflows.R")
-source("functions.R")
+#rm(list = ls())
+
+source("casesWorkflows_c.R")
+source("functions_c.R")
 
 ########## Inputs ##########
 
@@ -36,7 +38,7 @@ sequenceDistance <- 50
 inputsFolder <- "UMI in R1 and R2"
 
 #outputs folder
-outputsFolder <- "UMIc_output"
+outputsFolder <- "results_pilot_casesscenario2"
 
 ########## Run the appropriate scenario ##########
 
@@ -45,7 +47,7 @@ if (pairedData & UMIlocation == "R1"){   #case 1 -- paired data and UMI only in 
   
   inputFiles <- list.files(inputsFolder, pattern = "fastq") 
   
-  while(length(inputFiles)>0){
+  while(length(inputFiles) > 0){
     
     file1 <- inputFiles[1]
     
@@ -65,35 +67,45 @@ if (pairedData & UMIlocation == "R1"){   #case 1 -- paired data and UMI only in 
   }
  
   
-}else if (pairedData & UMIlocation == "R1 & R2"){   #case 2 -- paired data and UMI in Read1 and Read2
+} else if (pairedData & UMIlocation == "R1 & R2"){   #case 2 -- paired data and UMI in Read1 and Read2
   
   inputFiles <- list.files(inputsFolder, pattern = "fastq") 
   
-  while(length(inputFiles)>0){
+  while(length(inputFiles) > 0){
     
     file1 <- inputFiles[1]
     
-    commonPart <- as.character(str_split(file1,"R1", simplify = T))
+    commonPart <- as.character(str_split(file1, "R1", simplify = T))
     commonPart <- commonPart[length(commonPart)]
     
-    file2 <- str_replace(file1,paste0("R1",commonPart),paste0("R2",commonPart))
+    file2 <- str_replace(file1, 
+                         paste0("R1", commonPart), 
+                         paste0("R2", commonPart))
     
-    filepath1 <- paste0(inputsFolder,"/",file1)
-    filepath2 <- paste0(inputsFolder,"/",file2)
+    filepath1 <- paste0(inputsFolder, "/", file1)
+    filepath2 <- paste0(inputsFolder, "/", file2)
+    
+    cat(c("Files:", file1, file2, "\n"))
 
-    pairedR1R2(filepath1, filepath2, outputsFolder, 
-               UMIlength, UMIdistance, sequenceLength, sequenceDistance, countsCutoff)
+    pairedR1R2(filepath1, 
+               filepath2, 
+               outputsFolder, 
+               UMIlength, 
+               UMIdistance, 
+               sequenceLength, 
+               sequenceDistance, 
+               countsCutoff)
     
     
-    inputFiles <- inputFiles[str_detect(inputFiles,paste0(file1,"|",file2), negate = T)]
+    inputFiles <- inputFiles[str_detect(inputFiles, paste0(file1, "|", file2), negate = T)]
   }
 
   
-}else if (!pairedData){  #case 3 -- single data
+} else if (!pairedData){  #case 3 -- single data
   
   inputFiles <- list.files(inputsFolder, pattern = "fastq") 
   
-  while(length(inputFiles)>0){
+  while(length(inputFiles) > 0){
     
     file1 <- inputFiles[1]
     
