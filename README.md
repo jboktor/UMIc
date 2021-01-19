@@ -33,7 +33,7 @@ The framework consists of three scripts:
 - ```casesWorkflows.R```
 - ```functions.R```
 
-In order to run the project, set the [R](https://github.com/BiodataAnalysisGroup/UMIc/tree/master/R) folder as your working directory, set the parameters input parameters in the main script ```UMIsProject.R``` and then use the following command:
+In order to run the project, set the [R](https://github.com/BiodataAnalysisGroup/UMIc/tree/master/R) folder as your working directory, set the input parameters in the main script ```UMIsProject.R``` and then use the following command:
 ```
 source("UMIsProject.R")
 ```
