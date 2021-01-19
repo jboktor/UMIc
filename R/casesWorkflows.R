@@ -148,8 +148,8 @@ pairedR1R2 <- function(filepath1,
   reads1 <- ShortRead::readFastq(filepath1)
   reads2 <- ShortRead::readFastq(filepath2)
   
-   reads1 <- reads1[1:1000]
-   reads2 <- reads2[1:1000]
+   #reads1 <- reads1[1:1000]
+   #reads2 <- reads2[1:1000]
 
   # File 1
   seq <- data.table::as.data.table(ShortRead::sread(reads1))
