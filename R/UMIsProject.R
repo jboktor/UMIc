@@ -7,8 +7,8 @@ library(stringdist)
 
 #rm(list = ls())
 
-source("casesWorkflows_c.R")
-source("functions_c.R")
+source("casesWorkflows.R")
+source("functions.R")
 
 ########## Inputs ##########
 
