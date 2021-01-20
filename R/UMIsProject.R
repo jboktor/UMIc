@@ -5,7 +5,7 @@ library(ShortRead)
 library(Biostrings)
 library(stringdist)
 
-#rm(list = ls())
+rm(list = ls())
 
 source("casesWorkflows.R")
 source("functions.R")
@@ -17,28 +17,28 @@ pairedData <- T
 
 #UMI located in Read1 --> "R1"
 #UMI located in Read1 and Read2 --> "R1 & R2"
-UMIlocation <- "R1 & R2"
+UMIlocation <- "R1"
 
 #length of the UMI
-UMIlength <- 10
+UMIlength <- 12
 
 #length of th sequence
 sequenceLength <- 251
 
 #min read counts per UMI, for initial data cleaning
-countsCutoff <- 0
+countsCutoff <- 5
 
 #max UMI distance for UMI merging
-UMIdistance <- 5
+UMIdistance <- 1
 
 #max sequence distance for UMI correction
-sequenceDistance <- 50
+sequenceDistance <- 30
 
 #inputs folder / working directory
-inputsFolder <- "UMI in R1 and R2"
+inputsFolder <- "newData"
 
 #outputs folder
-outputsFolder <- "results_pilot_casesscenario2"
+outputsFolder <- "results_case1"
 
 ########## Run the appropriate scenario ##########
 
