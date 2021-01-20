@@ -519,16 +519,16 @@ UMIcorrectionPairedR1 <- function(intermediate.table,
       
       temp.intermediate = temp.intermediate[who,]
       
-      temp_read1 = first_consensus[which(first_consensus$UMI %in% intermediate.table$UMI),]$read1
-      temp_read2 = first_consensus[which(first_consensus$UMI %in% intermediate.table$UMI),]$read2
+      temp_read1 = first_consensus[which(first_consensus$UMI %in% temp.intermediate$UMI),]$read1
+      temp_read2 = first_consensus[which(first_consensus$UMI %in% temp.intermediate$UMI),]$read2
       
-      dist1 = stringdist::stringdistmatrix(a = best$read1[1],
+      dist1 = stringdist::stringdistmatrix(a = best$read1,
                                            b = temp_read1,
                                            method = "hamming")[1,]
       
-      dist2 = stringdist::stringdistmatrix(a = best$read2[1],
+      dist2 = stringdist::stringdistmatrix(a = best$read2,
                                            b = temp_read2,
-                                           method = "hamming")[2,]
+                                           method = "hamming")[1,]
       
       who = which((as.numeric(dist1) <= sequenceDistance) & (as.numeric(dist2) <= sequenceDistance))
       
@@ -566,8 +566,8 @@ UMIcorrectionPairedR1 <- function(intermediate.table,
     #   }
     # }
     
-    IDs_1 <- append(IDs_1,intermediate.table$ID1[1])
-    IDs_2 <- append(IDs_2,intermediate.table$ID2[1])
+    IDs_1 <- append(IDs_1, intermediate.table$ID1[1])
+    IDs_2 <- append(IDs_2, intermediate.table$ID2[1])
     counts <- append(counts, list.counts)
     uniqueUMIs <- append(uniqueUMIs, list.best)
     intermediate.table <- intermediate.table[str_detect(intermediate.table$UMI, 
