@@ -11,8 +11,8 @@ pairedR1 <- function(filepath1,
   reads1 <- readFastq(filepath1)
   reads2 <- readFastq(filepath2)
   
-  # reads1 = reads1[1:200,]
-  # reads2 = reads2[1:200,]
+  # reads1 = reads1[1:300,]
+  # reads2 = reads2[1:300,]
   
   #File 1
   seq <- as.data.table(sread(reads1))
@@ -114,32 +114,32 @@ pairedR1 <- function(filepath1,
   #produce Outputs 
 
   dir.create(outputsFolder)
-  
+
   #File1
-  file <- ShortReadQ(DNAStringSet(consensus_mean$read1), 
+  file <- ShortReadQ(DNAStringSet(consensus_mean$read1),
                      FastqQuality(consensus_mean$quality1),
                      BStringSet(paste0(newUMIs$ID1," ",consensus_mean$UMI)))
-  
-  
+
+
   fileSplit <- as.data.table(str_split(filepath1,"\\/"))
   fileSplit <- as.data.table(str_split(fileSplit[nrow(fileSplit)],"\\."))
   output <- paste0(outputsFolder,"/", fileSplit[1], "_corrected.fastq.gz")
   part <- fileSplit[1]
   file.create(output)
   writeFastq(file, output, mode = "a")
-  
+
   #File2
-  file <- ShortReadQ(DNAStringSet(consensus_mean$read2), 
+  file <- ShortReadQ(DNAStringSet(consensus_mean$read2),
                      FastqQuality(consensus_mean$quality2),
                      BStringSet(paste0(newUMIs$ID2," ",consensus_mean$UMI)))
-  
+
   fileSplit <- as.data.table(str_split(filepath2,"\\/"))
   fileSplit <- as.data.table(str_split(fileSplit[nrow(fileSplit)],"\\."))
   output <- paste0(outputsFolder,"/", fileSplit[1], "_corrected.fastq.gz")
   file.create(output)
   writeFastq(file, output, mode = "a")
-  
-  
+
+
   output.csv <- as.data.table(cbind(UMI = consensus_mean$UMI,
                                     UMIs = newUMIs$UMI,
                                     counts = newUMIs$Counts,
@@ -149,9 +149,9 @@ pairedR1 <- function(filepath1,
                                     quality2 = consensus_mean$quality2,
                                     ID1 = paste0(newUMIs$ID1," ",consensus_mean$UMI),
                                     ID2 = paste0(newUMIs$ID2," ",consensus_mean$UMI)))
-  
+
   write.table(output.csv,paste0(outputsFolder,"/",part,"_summary_table.csv"), sep ="\t", row.names = F)
-  
+
   remove(part, file, output, fileSplit, output.csv)
   
 }

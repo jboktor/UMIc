@@ -59,23 +59,14 @@ if (pairedData & UMIlocation == "R1"){   #case 1 -- paired data and UMI only in 
     filepath1 <- paste0(inputsFolder,"/",file1)
     filepath2 <- paste0(inputsFolder,"/",file2)
     
-    time.spent = system.time({
-      pairedR1(filepath1, 
-               filepath2, 
-               outputsFolder, 
-               UMIlength, 
-               UMIdistance, 
-               sequenceLength, 
-               sequenceDistance, 
-               countsCutoff)
-    })
-    
-    cat(c(time.spent, filepath1, filepath2, "\n"), 
-        file = "time-statistics.txt", 
-        append = TRUE)
-    
-
-    
+    pairedR1(filepath1, 
+             filepath2, 
+             outputsFolder, 
+             UMIlength, 
+             UMIdistance, 
+             sequenceLength, 
+             sequenceDistance, 
+             countsCutoff)
     
     inputFiles <- inputFiles[str_detect(inputFiles,paste0(file1,"|",file2), negate = T)]
   }

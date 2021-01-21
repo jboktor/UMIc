@@ -15,7 +15,7 @@ groupingPairedR1 <- function(intermediate.table, # r1,
   
   if(nrow(intermediate.table.c1) > 0){
     
-      f1 = full[which(full$UMI12 %in% intermediate.table.c1$UMI12),] 
+      f1 = full[which(full$UMI %in% intermediate.table.c1$UMI),] 
       f1 = f1[order(f1$id), ]
       
       f2 = full2[which(full2$id %in% f1$id), ]
@@ -500,7 +500,7 @@ UMIcorrectionPairedR1 <- function(intermediate.table,
   counts <- c()
   
   #while((nrow(intermediate.table)>1) & (intermediate.table[1,count] > 5)){
-  while((nrow(intermediate.table)>1)){
+  while(nrow(intermediate.table) > 1){
     
     best <- first_consensus[which(first_consensus$UMI == intermediate.table$UMI[1]),]
     list.best <- best$UMI[1]
@@ -530,14 +530,16 @@ UMIcorrectionPairedR1 <- function(intermediate.table,
                                            b = temp_read2,
                                            method = "hamming")[1,]
       
-      who = which((as.numeric(dist1) <= sequenceDistance) & (as.numeric(dist2) <= sequenceDistance))
+      who = which((dist1 <= sequenceDistance) & (dist2 <= sequenceDistance))
       
       if(length(who) > 0){
         
         temp.intermediate = temp.intermediate[who,]
+        list.best = c(list.best, temp.intermediate$UMI)
+        list.counts = c(list.counts, temp.intermediate$count)
         
-        list.best <- paste0(list.best, "|", temp.intermediate$UMI)
-        list.counts <- paste0(list.counts, "|", temp.intermediate$count)
+        list.best <- paste(list.best, collapse = "|")
+        list.counts <- paste(list.counts, collapse = "|")
         
       }
       
