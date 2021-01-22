@@ -35,10 +35,10 @@ UMIdistance <- 1
 sequenceDistance <- 3
 
 #inputs folder / working directory
-inputsFolder <- "C://Users//User//Desktop//UMI-project//UMIc//data//case3"
+inputsFolder <- "data//case3"
 
 #outputs folder
-outputsFolder <- "C://Users//User//Desktop//UMI-project//results_case3"
+outputsFolder <- "results_case3"
 
 ########## Run the appropriate scenario ##########
 
