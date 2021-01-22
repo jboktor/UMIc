@@ -5,7 +5,7 @@ library(ShortRead)
 library(Biostrings)
 library(stringdist)
 
-rm(list = ls())
+#rm(list = ls())
 
 source("casesWorkflows.R")
 source("functions.R")
@@ -13,7 +13,7 @@ source("functions.R")
 ########## Inputs ##########
 
 #type of data - paired or single
-pairedData <- T
+pairedData <- F
 
 #UMI located in Read1 --> "R1"
 #UMI located in Read1 and Read2 --> "R1 & R2"
@@ -32,13 +32,13 @@ countsCutoff <- 5
 UMIdistance <- 1
 
 #max sequence distance for UMI correction
-sequenceDistance <- 30
+sequenceDistance <- 3
 
 #inputs folder / working directory
-inputsFolder <- "newData"
+inputsFolder <- "C://Users//User//Desktop//UMI-project//UMIc//data//case3"
 
 #outputs folder
-outputsFolder <- "results_case1"
+outputsFolder <- "C://Users//User//Desktop//UMI-project//results_case3"
 
 ########## Run the appropriate scenario ##########
 
@@ -116,8 +116,13 @@ if (pairedData & UMIlocation == "R1"){   #case 1 -- paired data and UMI only in 
     
     filepath1 <- paste0(inputsFolder,"/",file1)
 
-    single(filepath1, outputsFolder, 
-           UMIlength, UMIdistance, sequenceLength, sequenceDistance, countsCutoff)
+    single(filepath1, 
+           outputsFolder, 
+           UMIlength, 
+           UMIdistance, 
+           sequenceLength, 
+           sequenceDistance, 
+           countsCutoff)
     
     inputFiles <- inputFiles[str_detect(inputFiles,file1, negate = T)]
   }

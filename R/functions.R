@@ -239,49 +239,118 @@ groupingPairedR1R2 <- function(intermediate.table, # counts,
   
 }
 
-groupingSingle <- function(r1, counts, full, quality, UMIlength){
+groupingSingle <- function(intermediate.table, # r1, 
+                               # counts, 
+                               full, 
+                               quality,  
+                               UMIlength){
+    
+    intermediate.table.c1 = intermediate.table[which(intermediate.table$count == 1), ]
+    intermediate.table.c2 = intermediate.table[which(intermediate.table$count != 1), ]
+    
+    rm(intermediate.table)
+    
+    result = list()
+    
+    if(nrow(intermediate.table.c1) > 0){
+      
+      f1 = full[which(full$UMI %in% intermediate.table.c1$UMI),] 
+      f1 = f1[order(f1$id), ]
+      
+      qr1 = quality[which(quality$id %in% f1$id), ]
+      qr1 = qr1[order(qr1$id), ]
+      qr1 = as.matrix(qr1[,1:(ncol(qr1)-1)])
+      qr1 = qr1 + 33
+      qr1 = base::apply(qr1, 1, intToUtf8)
+      qr1 = as.character(qr1)
+      
+      result.1 = data.table(UMI = f1$UMI12,
+                            read1 = f1$read, quality1 = qr1)
+      
+      colnames(result.1) = c("UMI" , "read1", "quality1")
+      
+      rm(f1, qr1)
+      
+      result[[1]] = result.1
+      
+    }
+    
+    if(nrow(intermediate.table.c2) > 0){
+      
+      for(i in 1:nrow(intermediate.table.c2)){
+        
+        r1 = intermediate.table.c2$UMI[i]
+        
+        #reads with specific UMI
+        grouping = full[which(full$UMI == r1), ]
+        
+        quality.1 = quality[which(quality$id %in% grouping$id), ]
+        
+        grouping = grouping[order(grouping$id), ]
+        
+        quality.1 = quality.1[order(quality.1$id), ]
+        
+        #File 1
+        grouping_q = cbind(grouping, quality.1[,-c("id")])
+        
+        rm(grouping, quality.1)
+        
+        result1 <- calculationsFunction(grouping_q) 
+        
+        result.2 <- data.table(UMI = substr(r1,1,UMIlength),
+                               read1 = result1[1,1], quality1 = result1[1,2])
+        
+        colnames(result.2) <- c("UMI" , "read1", "quality1")
+        
+        result[[i+1]] = result.2
+      }
+    }
+    
+    result = rbindlist(result)
+    
+    return(result)
   
-  if ((counts == 1)){
+  #if ((counts == 1)){
     
-    temp.result <- full[which(full$UMI == r1),]
-    read1 <- temp.result$read
+   # temp.result <- full[which(full$UMI == r1),]
+   #  read1 <- temp.result$read
     
-    quality.read1 <- as.character(quality[which(quality$id == temp.result$id), 1:(ncol(quality)-1)])
-    quality.read1 <- as.numeric(quality.read1) + 33
-    quality.read1 <- intToUtf8(quality.read1)
+   # quality.read1 <- as.character(quality[which(quality$id == temp.result$id), 1:(ncol(quality)-1)])
+   # quality.read1 <- as.numeric(quality.read1) + 33
+   # quality.read1 <- intToUtf8(quality.read1)
     
-    result <- data.table(UMI = substr(r1,1,UMIlength),
-                         read1 = read1, quality1 = quality.read1)
+   #  result <- data.table(UMI = substr(r1,1,UMIlength),
+   #                      read1 = read1, quality1 = quality.read1)
     
-    colnames(result) <- c("UMI" , "read1", "quality1")
+  #  colnames(result) <- c("UMI" , "read1", "quality1")
     
-  }else{
+  #}else{
   
     #print(r1)
     
     #reads with specific UMI
-    grouping = full[which(full$UMI == r1), ]
+   # grouping = full[which(full$UMI == r1), ]
     
-    quality = quality[which(quality$id %in% grouping$id), ]
+   # quality = quality[which(quality$id %in% grouping$id), ]
     
-    grouping = grouping[order(grouping$id), ]
+   # grouping = grouping[order(grouping$id), ]
     
-    quality = quality[order(quality$id), ]
+   # quality = quality[order(quality$id), ]
     
     #File 1
-    grouping_q = cbind(grouping, quality[,-c("id")])
+   # grouping_q = cbind(grouping, quality[,-c("id")])
     
-    rm(grouping, quality)
+   # rm(grouping, quality)
     
-    result1 <- calculationsFunction(grouping_q) 
+   # result1 <- calculationsFunction(grouping_q) 
     
-    result <- data.table(UMI = substr(r1,1,UMIlength),
-                         read1 = result1[1,1], quality1 = result1[1,2])
+   # result <- data.table(UMI = substr(r1,1,UMIlength),
+    #                     read1 = result1[1,1], quality1 = result1[1,2])
     
-    colnames(result) <- c("UMI" , "read1", "quality1")
-  }
+   # colnames(result) <- c("UMI" , "read1", "quality1")
+ # }
   
-  return(result)
+  #return(result)
 }
 
 groupingFinalPairedR1 <- function(newUMIs, # r1, 
@@ -457,36 +526,64 @@ groupingFinalPairedR1R2 <- function(newUMIs, # r1,
   # }
 }
 
-groupingFinalSingle <- function(r1, full, quality, first_consensus, UMIlength){
-  if (nchar(r1) == UMIlength){
+groupingFinalSingle <-function(newUMIs, # r1, 
+                                    full, 
+                                    quality, 
+                                    first_consensus, 
+                                    UMIlength){
     
-    result <- first_consensus[which(first_consensus$UMI == r1),]
-    colnames(result) <- c("UMI" , "read1", "quality1")
+    newUMIs.1 = newUMIs[which(str_length(newUMIs$UMI) == UMIlength), ]
+    newUMIs.2 = newUMIs[which(str_length(newUMIs$UMI) != UMIlength), ]
     
-  }else{
-    #reads with specific UMI
-    grouping = full[str_detect(full$UMI,as.character(r1)), ]
+    rm(newUMIs)
     
-    quality = quality[which(quality$id %in% grouping$id), ]
+    result = list()
     
-    grouping = grouping[order(grouping$id), ]
+    if(nrow(newUMIs.1) > 0){
+      
+      result.1 = first_consensus[which(first_consensus$UMI %in% newUMIs.1$UMI),]
+      colnames(result.1) = c("UMI" , "read1", "quality1")
+      
+      result[[1]] = result.1
+      
+    }
     
-    quality = quality[order(quality$id), ]
+    if(nrow(newUMIs.2) > 0){
+      
+      for(i in 1:nrow(newUMIs.2)){
+        
+        r1 = newUMIs.2$UMI[i]
+        
+        #reads with specific UMI
+        grouping = full[str_detect(full$UMI,as.character(r1)), ]
+        
+        quality.1 = quality[which(quality$id %in% grouping$id), ]
+        
+        grouping = grouping[order(grouping$id), ]
+        
+        quality.1 = quality.1[order(quality.1$id), ]
+        
+        #File 1
+        grouping_q = cbind(grouping, quality.1[,-c("id")])
+        
+        rm(grouping, quality.1)
+        
+        result1 <- calculationsFunction(grouping_q) 
+        
+        result.2 <- data.table(UMI = substr(r1,1,12),
+                               read1 = result1[1,1], quality1 = result1[1,2])
+        
+        colnames(result.2) <- c("UMI" , "read1", "quality1")
+        
+        result[[i+2]] = result.2
+      }
+      
+    }
     
-    #File 1
-    grouping_q = cbind(grouping, quality[,-c("id")])
-
-    rm(grouping, quality)
+    result = rbindlist(result)
     
-    result1 <- calculationsFunction(grouping_q) 
-    
-    result <- data.table(UMI = substr(r1,1,UMIlength),
-                         read1 = result1[1,1], quality1 = result1[1,2])
-    
-    colnames(result) <- c("UMI" , "read1", "quality1")
-  }
+    return(result)
   
-  return(result)
 }
 
 UMIcorrectionPairedR1 <- function(intermediate.table,
@@ -709,53 +806,77 @@ UMIcorrectionPairedR1R2 <- function(intermediate.table,
   return(newUMIs)
 }
 
-UMIcorrectionSingle <- function(intermediate.table,first_consensus, sequenceDistance, UMIdistance){
-  
-  uniqueUMIs <- c()
-  IDs_1 <- c()
-  counts <- c()
-  
-  #while((nrow(intermediate.table)>1) & (intermediate.table[1,count] > 5)){
-  while((nrow(intermediate.table)>1)){
+UMIcorrectionSingle<- function(intermediate.table,
+                                    first_consensus, 
+                                    sequenceDistance, 
+                                    UMIdistance){
     
-    best <- first_consensus[which(first_consensus$UMI == intermediate.table$UMI[1]),]
-    list.best <- best$UMI[1]
-    list.counts <- intermediate.table$count[1]
+    uniqueUMIs <- c()
+    IDs_1 <- c()
+    counts <- c()
     
-    iterations <- c(2:nrow(intermediate.table))
-    for (i in iterations){
+    #while((nrow(intermediate.table)>1) & (intermediate.table[1,count] > 5)){
+    while(nrow(intermediate.table) > 1){
       
-      base_dist <- stringDist(c(best$UMI[1], intermediate.table$UMI[i]), method = "hamming") 
+      best <- first_consensus[which(first_consensus$UMI == intermediate.table$UMI[1]),]
+      list.best <- best$UMI[1]
+      list.counts <- intermediate.table$count[1]
       
-      if (base_dist <= UMIdistance){
+      
+      temp.intermediate = intermediate.table[2:nrow(intermediate.table), ]
+      
+      base_dist <- stringdist::stringdistmatrix(a = best$UMI[1], 
+                                                b = temp.intermediate$UMI, 
+                                                method = "hamming")[1,]
+      
+      who = which(base_dist <= UMIdistance)
+      
+      if(length(who) > 0){
         
-        temp_read1 <- first_consensus[which(first_consensus$UMI ==  intermediate.table$UMI[i]),read1]
-        dist1 <- stringDist(c(best$read1[1], temp_read1), method = "hamming") 
-            
-        if (as.numeric(dist1) <= sequenceDistance) {
-          list.best <- paste0(list.best,"|",intermediate.table$UMI[i])
-          list.counts <- paste0(list.counts,"|",intermediate.table$count[i])
+        temp.intermediate = temp.intermediate[who,]
+        
+        temp_read1 = first_consensus[which(first_consensus$UMI %in% temp.intermediate$UMI),]$read1
+        
+        dist1 = stringdist::stringdistmatrix(a = best$read1,
+                                             b = temp_read1,
+                                             method = "hamming")[1,]
+        
+        who = which(dist1 <= sequenceDistance) 
+        
+        if(length(who) > 0){
+          
+          temp.intermediate = temp.intermediate[who,]
+          list.best = c(list.best, temp.intermediate$UMI)
+          list.counts = c(list.counts, temp.intermediate$count)
+          
+          list.best <- paste(list.best, collapse = "|")
+          list.counts <- paste(list.counts, collapse = "|")
+          
         }
+        
       }
+      
+      
+      IDs_1 <- append(IDs_1, intermediate.table$ID1[1])
+      counts <- append(counts, list.counts)
+      uniqueUMIs <- append(uniqueUMIs, list.best)
+      intermediate.table <- intermediate.table[str_detect(intermediate.table$UMI, 
+                                                          as.character(list.best), 
+                                                          negate = T), ]
+      
     }
-
-    IDs_1 <- append(IDs_1,intermediate.table$ID1[1])
-    counts <- append(counts, list.counts)
-    uniqueUMIs <- append(uniqueUMIs,list.best)
-    intermediate.table <- intermediate.table[str_detect(intermediate.table$UMI,as.character(list.best), negate = T), ]
     
-  }
+    if (!is.null(intermediate.table)){
+      
+      IDs_1 <- append(IDs_1,intermediate.table$ID1[1])
+      counts <- append(counts, intermediate.table$count[1])
+      uniqueUMIs <- append(uniqueUMIs,intermediate.table$UMI[1])
+      
+    }
+    
+    newUMIs <- as.data.table(cbind(UMI = uniqueUMIs, ID1 = IDs_1,  Counts = counts))
+    return(newUMIs)  
   
-  if (!is.null(intermediate.table)){
-    
-    IDs_1 <- append(IDs_1,intermediate.table$ID1[1])
-    counts <- append(counts, intermediate.table$count[1])
-    uniqueUMIs <- append(uniqueUMIs,intermediate.table$UMI[1])
-    
-  }
-  
-  newUMIs <- as.data.table(cbind(UMI = uniqueUMIs, ID1 = IDs_1, Counts = counts))
-  return(newUMIs)
 }
 
 

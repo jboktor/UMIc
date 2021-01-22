@@ -397,30 +397,53 @@ single <- function(filepath1,
   rm(ids, seq, reads1)
   
   #first consensus
-  result_mean = list()
+  result_mean = groupingSingle(intermediate.table, # $UMI[i], 
+                                 # intermediate.table$count[i], 
+                                 full, 
+                                 quality,  
+                                 UMIlength)
   
-  for(i in c(1:nrow(intermediate.table))){
-    
-    result_mean[[i]] = groupingSingle(intermediate.table$UMI[i], intermediate.table$count[i], full, quality, UMIlength)
-    
-  }
-  
-  result_mean <- bind_rows(result_mean)
-  
+ 
   #UMI correction
-  newUMIs <- UMIcorrectionSingle(intermediate.table,result_mean,UMIdistance, sequenceDistance)
+  newUMIs <- UMIcorrectionSingle(intermediate.table,
+                                   result_mean,
+                                   sequenceDistance, 
+                                   UMIdistance)
+  
   rm(intermediate.table)
   
   #final consensus
-  consensus_mean = list()
+  consensus_mean = groupingFinalSingle(newUMIs, # i, 
+                                         full, 
+                                         quality, 
+                                         result_mean, 
+                                         UMIlength)
   
-  for(i in newUMIs$UMI){
-    
-    consensus_mean[[i]] = groupingFinalSingle(i, full, quality,result_mean, UMIlength)
-    
-  }
+  #first consensus
+  #result_mean = list()
   
-  consensus_mean <- bind_rows(consensus_mean)
+  #for(i in c(1:nrow(intermediate.table))){
+    
+   # result_mean[[i]] = groupingSingle(intermediate.table$UMI[i], intermediate.table$count[i], full, quality, UMIlength)
+    
+  #}
+  
+  #result_mean <- bind_rows(result_mean)
+  
+  #UMI correction
+  #newUMIs <- UMIcorrectionSingle(intermediate.table,result_mean,UMIdistance, sequenceDistance)
+  #rm(intermediate.table)
+  
+  #final consensus
+  #consensus_mean = list()
+  
+  #for(i in newUMIs$UMI){
+    
+   # consensus_mean[[i]] = groupingFinalSingle(i, full, quality,result_mean, UMIlength)
+    
+  #}
+  
+  #consensus_mean <- bind_rows(consensus_mean)
   
   #produce Outputs 
   
