@@ -10,7 +10,7 @@ The packages needed to be installed, in order to run the project are:
 - from CRAN
 
 ```
-install.packages(c("tidyverse", "data.table", "stringr", "stringdist"))
+install.packages(c("tidyverse", "data.table", "stringdist"))
 ```
 
 - from Bioconductor
