@@ -7,6 +7,7 @@ pairedR1 <- function(filepath1,
                      sequenceDistance,
                      countsCutoff){
   
+  dir.create(outputsFolder)
   #read input files
   reads1 <- readFastq(filepath1)
   reads2 <- readFastq(filepath2)
@@ -90,7 +91,8 @@ pairedR1 <- function(filepath1,
   newUMIs <- UMIcorrectionPairedR1(intermediate.table,
                                    result_mean,
                                    sequenceDistance, 
-                                   UMIdistance)
+                                   UMIdistance,
+                                   outputsFolder)
   
   rm(intermediate.table)
   
@@ -113,7 +115,7 @@ pairedR1 <- function(filepath1,
 
   #produce Outputs 
 
-  dir.create(outputsFolder)
+  
 
   #File1
   file <- ShortReadQ(DNAStringSet(consensus_mean$read1),
@@ -164,6 +166,9 @@ pairedR1R2 <- function(filepath1,
                        sequenceLength, 
                        sequenceDistance,
                        countsCutoff){
+  
+  dir.create(outputsFolder, showWarnings = FALSE)
+  
   # read input files
   reads1 <- ShortRead::readFastq(filepath1)
   reads2 <- ShortRead::readFastq(filepath2)
@@ -272,7 +277,8 @@ pairedR1R2 <- function(filepath1,
                                      result_mean,
                                      sequenceDistance, 
                                      UMIdistance, 
-                                     UMIlength)
+                                     UMIlength,
+                                     outputsFolder)
   
   rm(intermediate.table)
   
@@ -306,7 +312,6 @@ pairedR1R2 <- function(filepath1,
   
   # produce Outputs 
   
-  dir.create(outputsFolder, showWarnings = FALSE)
   
   # File1
   file <- ShortReadQ(DNAStringSet(consensus_mean$read1), 

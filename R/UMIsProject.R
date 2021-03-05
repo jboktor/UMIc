@@ -13,7 +13,7 @@ source("functions.R")
 ########## Inputs ##########
 
 #type of data - paired or single
-pairedData <- F
+pairedData <- T
 
 #UMI located in Read1 --> "R1"
 #UMI located in Read1 and Read2 --> "R1 & R2"
@@ -35,10 +35,10 @@ UMIdistance <- 1
 sequenceDistance <- 3
 
 #inputs folder / working directory
-inputsFolder <- "data//case3"
+inputsFolder <- "data//case1"
 
 #outputs folder
-outputsFolder <- "results_case3"
+outputsFolder <- "results_case_"
 
 ########## Run the appropriate scenario ##########
 

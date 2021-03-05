@@ -589,7 +589,9 @@ groupingFinalSingle <-function(newUMIs, # r1,
 UMIcorrectionPairedR1 <- function(intermediate.table,
                                   first_consensus, 
                                   sequenceDistance, 
-                                  UMIdistance){
+                                  UMIdistance,
+                                  outputsFolder){
+  dist.calc <- 0
   
   uniqueUMIs <- c()
   IDs_1 <- c()
@@ -610,6 +612,8 @@ UMIcorrectionPairedR1 <- function(intermediate.table,
                                               b = temp.intermediate$UMI, 
                                               method = "hamming")[1,]
     
+    dist.calc <- dist.calc + length(base_dist)
+    
     who = which(base_dist <= UMIdistance)
     
     if(length(who) > 0){
@@ -626,6 +630,8 @@ UMIcorrectionPairedR1 <- function(intermediate.table,
       dist2 = stringdist::stringdistmatrix(a = best$read2,
                                            b = temp_read2,
                                            method = "hamming")[1,]
+      
+      dist.calc <- dist.calc + (2*length(dist1))
       
       who = which((dist1 <= sequenceDistance) & (dist2 <= sequenceDistance))
       
@@ -685,6 +691,8 @@ UMIcorrectionPairedR1 <- function(intermediate.table,
   }
   
   newUMIs <- as.data.table(cbind(UMI = uniqueUMIs, ID1 = IDs_1, ID2 = IDs_2, Counts = counts))
+  
+  write(dist.calc, paste0(outputsFolder,"/Number_of_Hamming_distances_calculated.txt"))
   return(newUMIs)
 }
 
@@ -692,8 +700,9 @@ UMIcorrectionPairedR1R2 <- function(intermediate.table,
                                     first_consensus, 
                                     sequenceDistance, 
                                     UMIdistance, 
-                                    UMIlength){
-  
+                                    UMIlength,
+                                    outputsFolder){
+  dist.calc <- 0
   uniqueUMIs <- c()
   IDs_1 <- c()
   IDs_2 <- c()
@@ -724,6 +733,8 @@ UMIcorrectionPairedR1R2 <- function(intermediate.table,
     base_dist2 = stringdist::stringdistmatrix(a = best.UMI2,
                                               b = temp.UMI2,
                                               method = "hamming")[1,]
+    dist.calc <- dist.calc +length(base_dist1) +length(base_dist2)
+    
     
     who = which((base_dist1 <= UMIdistance) & (base_dist2 <= UMIdistance))
     
@@ -740,6 +751,7 @@ UMIcorrectionPairedR1R2 <- function(intermediate.table,
       dist2 = stringdist::stringdistmatrix(a = best$read2[1], 
                                            b = temp_read2, 
                                            method = "hamming")[1,]
+      dist.calc <- dist.calc +length(dist1) +length(dist2)
       
       who = which((dist1 <= sequenceDistance) & (dist2 <= sequenceDistance))
       
@@ -802,7 +814,7 @@ UMIcorrectionPairedR1R2 <- function(intermediate.table,
   }
   
   newUMIs = as.data.table(cbind(UMI = uniqueUMIs, ID1 = IDs_1, ID2 = IDs_2, Counts = counts))
-  
+  write(dist.calc, paste0(outputsFolder,"/Number_of_Hamming_distances_calculated.txt"))
   return(newUMIs)
 }
 
