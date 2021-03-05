@@ -12,6 +12,7 @@ pairedR1 <- function(filepath1,
   reads1 <- readFastq(filepath1)
   reads2 <- readFastq(filepath2)
   
+  start.time <- Sys.time()
   # reads1 = reads1[1:300,]
   # reads2 = reads2[1:300,]
   
@@ -115,8 +116,17 @@ pairedR1 <- function(filepath1,
 
   #produce Outputs 
 
+  end.time <- Sys.time()
   
-
+  total.time.secs <- difftime(end.time,start.time,units = "secs")
+  total.time.mins <- difftime(end.time,start.time,units = "mins")
+  
+  line = paste0("Total time in secs: ", total.time.secs)
+  write(line, paste0(outputsFolder,"/extra_info.txt"), append = T)
+  
+  line = paste0("Total time in mins: ", total.time.mins)
+  write(line, paste0(outputsFolder,"/extra_info.txt"), append = T)
+  
   #File1
   file <- ShortReadQ(DNAStringSet(consensus_mean$read1),
                      FastqQuality(consensus_mean$quality1),
@@ -172,6 +182,8 @@ pairedR1R2 <- function(filepath1,
   # read input files
   reads1 <- ShortRead::readFastq(filepath1)
   reads2 <- ShortRead::readFastq(filepath2)
+  
+  start.time <- Sys.time()
   
    #reads1 <- reads1[1:1000]
    #reads2 <- reads2[1:1000]
@@ -314,6 +326,17 @@ pairedR1R2 <- function(filepath1,
   
   
   # File1
+  end.time <- Sys.time()
+  
+  total.time.secs <- difftime(end.time,start.time,units = "secs")
+  total.time.mins <- difftime(end.time,start.time,units = "mins")
+  
+  line = paste0("Total time in secs: ", total.time.secs)
+  write(line, paste0(outputsFolder,"/extra_info.txt"), append = T)
+  
+  line = paste0("Total time in mins: ", total.time.mins)
+  write(line, paste0(outputsFolder,"/extra_info.txt"), append = T)
+  
   file <- ShortReadQ(DNAStringSet(consensus_mean$read1), 
                      FastqQuality(consensus_mean$quality1),
                      BStringSet(paste0(newUMIs$ID1, " ", substring(consensus_mean$UMI, 1, UMIlength))))

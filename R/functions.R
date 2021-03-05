@@ -692,7 +692,9 @@ UMIcorrectionPairedR1 <- function(intermediate.table,
   
   newUMIs <- as.data.table(cbind(UMI = uniqueUMIs, ID1 = IDs_1, ID2 = IDs_2, Counts = counts))
   
-  write(dist.calc, paste0(outputsFolder,"/Number_of_Hamming_distances_calculated.txt"))
+  line = paste0("Number of Hamming distances calculated: ", dist.calc)
+  write(line, paste0(outputsFolder,"/extra_info.txt"), append = T)
+  
   return(newUMIs)
 }
 
@@ -814,7 +816,10 @@ UMIcorrectionPairedR1R2 <- function(intermediate.table,
   }
   
   newUMIs = as.data.table(cbind(UMI = uniqueUMIs, ID1 = IDs_1, ID2 = IDs_2, Counts = counts))
-  write(dist.calc, paste0(outputsFolder,"/Number_of_Hamming_distances_calculated.txt"))
+  
+  line = paste0("Number of Hamming distances calculated: ", dist.calc)
+  write(line, paste0(outputsFolder,"/extra_info.txt"), append = T)
+  
   return(newUMIs)
 }
 
