@@ -8,6 +8,9 @@ pairedR1 <- function(filepath1,
                      countsCutoff){
   
   dir.create(outputsFolder)
+  file.create(paste0(outputsFolder, "/extra_info.txt")) 
+  memory <- c() 
+  memory[1] <-  mem_used()
   #read input files
   reads1 <- readFastq(filepath1)
   reads2 <- readFastq(filepath2)
@@ -46,7 +49,7 @@ pairedR1 <- function(filepath1,
   intermediate.table <- intermediate.table[which(intermediate.table$count >= countsCutoff),]
   
   rm(partIDs)
-  
+  memory[2] <- mem_used()
   intermediate.table = intermediate.table[order(intermediate.table$count, decreasing = TRUE), ]
   
   #data preparation
@@ -87,7 +90,7 @@ pairedR1 <- function(filepath1,
   # }
   
   # result_mean <- bind_rows(result_mean)
-  
+  memory[3] <- mem_used()
   #UMI correction
   newUMIs <- UMIcorrectionPairedR1(intermediate.table,
                                    result_mean,
@@ -95,8 +98,9 @@ pairedR1 <- function(filepath1,
                                    UMIdistance,
                                    outputsFolder)
   
-  rm(intermediate.table)
   
+  rm(intermediate.table)
+  memory[4] <- mem_used()
   #final consensus
   # consensus_mean = list()
   
@@ -110,6 +114,7 @@ pairedR1 <- function(filepath1,
                                            result_mean, 
                                            UMIlength)
     
+    memory[5] <- mem_used()
   # }
   
   # consensus_mean <- bind_rows(consensus_mean)
@@ -125,6 +130,21 @@ pairedR1 <- function(filepath1,
   write(line, paste0(outputsFolder,"/extra_info.txt"), append = T)
   
   line = paste0("Total time in mins: ", total.time.mins)
+  write(line, paste0(outputsFolder,"/extra_info.txt"), append = T)
+  
+  line = paste0("Memory used at start: ", memory[1])
+  write(line, paste0(outputsFolder,"/extra_info.txt"), append = T)
+  
+  line = paste0("Memory used after data cleaning: ", memory[2])
+  write(line, paste0(outputsFolder,"/extra_info.txt"), append = T)
+  
+  line = paste0("Memory used after first consensus: ", memory[3])
+  write(line, paste0(outputsFolder,"/extra_info.txt"), append = T)
+  
+  line = paste0("Memory used after UMI merging: ", memory[4])
+  write(line, paste0(outputsFolder,"/extra_info.txt"), append = T)
+  
+  line = paste0("Memory used after second consensus: ", memory[5])
   write(line, paste0(outputsFolder,"/extra_info.txt"), append = T)
   
   #File1
@@ -178,6 +198,9 @@ pairedR1R2 <- function(filepath1,
                        countsCutoff){
   
   dir.create(outputsFolder, showWarnings = FALSE)
+  file.create(paste0(outputsFolder, "/extra_info.txt"))
+  memory <- c() 
+  memory[1] <-  mem_used()
   
   # read input files
   reads1 <- ShortRead::readFastq(filepath1)
@@ -230,7 +253,7 @@ pairedR1R2 <- function(filepath1,
   intermediate.table <- intermediate.table[which(intermediate.table$count >= countsCutoff), ]
   
   rm(partIDs)
-  
+  memory[2] <-  mem_used()
   # data preparation
   full <- tidyr::separate(full, id, c("id1", "id2"), " ", remove = T)
   full <- dplyr::select(full, read, id1, UMI, UMI12)
@@ -265,7 +288,7 @@ pairedR1R2 <- function(filepath1,
                                    full2,
                                    quality2)
   
-  
+  memory[3] <-  mem_used()
   
   # for(i in 1:nrow(intermediate.table)){
   #   
@@ -293,7 +316,7 @@ pairedR1R2 <- function(filepath1,
                                      outputsFolder)
   
   rm(intermediate.table)
-  
+  memory[4] <-  mem_used()
   # final consensus
   
   cat("step 3\n")
@@ -305,7 +328,7 @@ pairedR1R2 <- function(filepath1,
                                            quality2,
                                            result_mean,
                                            UMIlength)
-  
+  memory[5] <-  mem_used()
   # consensus_mean = list()
   # 
   # for(i in c(1:nrow(newUMIs))){
@@ -337,6 +360,21 @@ pairedR1R2 <- function(filepath1,
   line = paste0("Total time in mins: ", total.time.mins)
   write(line, paste0(outputsFolder,"/extra_info.txt"), append = T)
   
+  
+  line = paste0("Memory used at start: ", memory[1])
+  write(line, paste0(outputsFolder,"/extra_info.txt"), append = T)
+  
+  line = paste0("Memory used after data cleaning: ", memory[2])
+  write(line, paste0(outputsFolder,"/extra_info.txt"), append = T)
+  
+  line = paste0("Memory used after first consensus: ", memory[3])
+  write(line, paste0(outputsFolder,"/extra_info.txt"), append = T)
+  
+  line = paste0("Memory used after UMI merging: ", memory[4])
+  write(line, paste0(outputsFolder,"/extra_info.txt"), append = T)
+  
+  line = paste0("Memory used after second consensus: ", memory[5])
+  write(line, paste0(outputsFolder,"/extra_info.txt"), append = T)
   file <- ShortReadQ(DNAStringSet(consensus_mean$read1), 
                      FastqQuality(consensus_mean$quality1),
                      BStringSet(paste0(newUMIs$ID1, " ", substring(consensus_mean$UMI, 1, UMIlength))))
@@ -384,9 +422,17 @@ single <- function(filepath1,
                    sequenceDistance,
                    countsCutoff){
   
+  dir.create(outputsFolder)
+  file.create(paste0(outputsFolder, "/extra_info.txt")) 
+  
+  memory <- c() 
+  memory[1] <-  mem_used()
+   
   #read input file
   reads1 <- readFastq(filepath1)
   
+  start.time <- Sys.time()
+  start.all <- proc.time()
   #File 1
   seq <- as.data.table(sread(reads1))
   ids <- as.data.table(reads1@id)
@@ -413,7 +459,7 @@ single <- function(filepath1,
   intermediate.table <- intermediate.table[which(intermediate.table$count >= countsCutoff),]
   
   rm(partIDs)
-  
+  memory[2] <-  mem_used()
   intermediate.table = intermediate.table[order(intermediate.table$count, decreasing = TRUE), ]
   
   #data preparation
@@ -431,22 +477,23 @@ single <- function(filepath1,
                                  quality,  
                                  UMIlength)
   
- 
+  memory[3] <-  mem_used()
   #UMI correction
   newUMIs <- UMIcorrectionSingle(intermediate.table,
                                    result_mean,
                                    sequenceDistance, 
-                                   UMIdistance)
+                                   UMIdistance,
+                                   outputsFolder)
   
   rm(intermediate.table)
-  
+  memory[4] <-  mem_used()
   #final consensus
   consensus_mean = groupingFinalSingle(newUMIs, # i, 
                                          full, 
                                          quality, 
                                          result_mean, 
                                          UMIlength)
-  
+  memory[5] <-  mem_used()
   #first consensus
   #result_mean = list()
   
@@ -475,7 +522,41 @@ single <- function(filepath1,
   
   #produce Outputs 
   
-  dir.create(outputsFolder)
+  end.time <- Sys.time()
+  end.all <- proc.time()
+  
+  total.time.secs <- difftime(end.time,start.time,units = "secs")
+  total.time.mins <- difftime(end.time,start.time,units = "mins")
+  time.fifference <- end.all - start.all
+  
+  line = paste0("Total time in secs: ", total.time.secs)
+  write(line, paste0(outputsFolder,"/extra_info.txt"), append = T)
+  
+  line = paste0("Total time in mins: ", total.time.mins)
+  write(line, paste0(outputsFolder,"/extra_info.txt"), append = T)
+  
+  line = paste0("User time: ", time.fifference[1])
+  write(line, paste0(outputsFolder,"/extra_info.txt"), append = T)
+  
+  line = paste0("System time: ", time.fifference[2])
+  write(line, paste0(outputsFolder,"/extra_info.txt"), append = T)
+  
+  line = paste0("Elapsed time: ", time.fifference[3])
+  write(line, paste0(outputsFolder,"/extra_info.txt"), append = T)
+  line = paste0("Memory used at start: ", memory[1])
+  write(line, paste0(outputsFolder,"/extra_info.txt"), append = T)
+ 
+  line = paste0("Memory used after data cleaning: ", memory[2])
+  write(line, paste0(outputsFolder,"/extra_info.txt"), append = T)
+  
+  line = paste0("Memory used after first consensus: ", memory[3])
+  write(line, paste0(outputsFolder,"/extra_info.txt"), append = T)
+  
+  line = paste0("Memory used after UMI merging: ", memory[4])
+  write(line, paste0(outputsFolder,"/extra_info.txt"), append = T)
+  
+  line = paste0("Memory used after second consensus: ", memory[5])
+  write(line, paste0(outputsFolder,"/extra_info.txt"), append = T)
   
   #File1
   file <- ShortReadQ(DNAStringSet(consensus_mean$read1), 

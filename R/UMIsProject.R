@@ -4,16 +4,17 @@ library(data.table)
 library(ShortRead)
 library(Biostrings)
 library(stringdist)
+library(pryr)
 
-#rm(list = ls())
+rm(list = ls())
 
-source("casesWorkflows.R")
-source("functions.R")
+source("R/casesWorkflows.R")
+source("R/functions.R")
 
 ########## Inputs ##########
 
 #type of data - paired or single
-pairedData <- T
+pairedData <- F
 
 #UMI located in Read1 --> "R1"
 #UMI located in Read1 and Read2 --> "R1 & R2"
@@ -35,10 +36,10 @@ UMIdistance <- 1
 sequenceDistance <- 3
 
 #inputs folder / working directory
-inputsFolder <- "data//case1"
+inputsFolder <- "data//case3"
 
 #outputs folder
-outputsFolder <- "results_case_"
+outputsFolder <- "results_case3"
 
 ########## Run the appropriate scenario ##########
 

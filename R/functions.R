@@ -826,8 +826,10 @@ UMIcorrectionPairedR1R2 <- function(intermediate.table,
 UMIcorrectionSingle<- function(intermediate.table,
                                     first_consensus, 
                                     sequenceDistance, 
-                                    UMIdistance){
-    
+                                    UMIdistance,
+                                    outputsFolder){
+    dist.calc <- 0
+  
     uniqueUMIs <- c()
     IDs_1 <- c()
     counts <- c()
@@ -846,6 +848,8 @@ UMIcorrectionSingle<- function(intermediate.table,
                                                 b = temp.intermediate$UMI, 
                                                 method = "hamming")[1,]
       
+      dist.calc <- dist.calc + length(base_dist)
+      
       who = which(base_dist <= UMIdistance)
       
       if(length(who) > 0){
@@ -858,6 +862,7 @@ UMIcorrectionSingle<- function(intermediate.table,
                                              b = temp_read1,
                                              method = "hamming")[1,]
         
+        dist.calc <- dist.calc + (length(dist1))
         who = which(dist1 <= sequenceDistance) 
         
         if(length(who) > 0){
@@ -892,6 +897,9 @@ UMIcorrectionSingle<- function(intermediate.table,
     }
     
     newUMIs <- as.data.table(cbind(UMI = uniqueUMIs, ID1 = IDs_1,  Counts = counts))
+    
+    line = paste0("Number of Hamming distances calculated: ", dist.calc)
+    write(line, paste0(outputsFolder,"/extra_info.txt"), append = T)
     return(newUMIs)  
   
 }
