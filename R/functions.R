@@ -409,7 +409,7 @@ groupingFinalPairedR1 <- function(newUMIs, # r1,
       result1 <- calculationsFunction(grouping_q) 
       result2 <- calculationsFunction(grouping_q2)
       
-      result.2 <- data.table(UMI = substr(r1,1,12),
+      result.2 <- data.table(UMI = substr(r1,1,UMIlength),
                            read1 = result1[1,1], quality1 = result1[1,2], 
                            read2 = result2[1,1], quality2 = result2[1,2])
       
@@ -555,7 +555,7 @@ groupingFinalSingle <-function(newUMIs, # r1,
         r1 = newUMIs.2$UMI[i]
         
         #reads with specific UMI
-        grouping = full[str_detect(full$UMI,as.character(r1)), ]
+        grouping = full[str_detect(full$UMI, as.character(r1)), ]
         
         quality.1 = quality[which(quality$id %in% grouping$id), ]
         
@@ -564,18 +564,21 @@ groupingFinalSingle <-function(newUMIs, # r1,
         quality.1 = quality.1[order(quality.1$id), ]
         
         #File 1
-        grouping_q = cbind(grouping, quality.1[,-c("id")])
+        grouping_q = cbind(grouping, quality.1[, -c("id")])
         
         rm(grouping, quality.1)
         
         result1 <- calculationsFunction(grouping_q) 
         
-        result.2 <- data.table(UMI = substr(r1,1,12),
-                               read1 = result1[1,1], quality1 = result1[1,2])
+        result.2 <- data.table(
+            UMI      = substr(r1, 1, UMIlength),
+            read1    = result1[1, 1], 
+            quality1 = result1[1, 2]
+        )
         
         colnames(result.2) <- c("UMI" , "read1", "quality1")
         
-        result[[i+2]] = result.2
+        result[[i + 2]] = result.2
       }
       
     }

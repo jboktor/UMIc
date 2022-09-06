@@ -115,6 +115,10 @@ pairedR1 <- function(filepath1,
                                            UMIlength)
     
     memory[5] <- mem_used()
+    
+    consensus_mean = consensus_mean[order(consensus_mean$UMI), ]
+    result_mean    = result_mean[order(result_mean$UMI), ]
+    newUMIs        = newUMIs[order(newUMIs$UMI), ]
   # }
   
   # consensus_mean <- bind_rows(consensus_mean)
@@ -329,6 +333,11 @@ pairedR1R2 <- function(filepath1,
                                            result_mean,
                                            UMIlength)
   memory[5] <-  mem_used()
+  
+  consensus_mean = consensus_mean[order(consensus_mean$UMI), ]
+  result_mean    = result_mean[order(result_mean$UMI), ]
+  newUMIs        = newUMIs[order(newUMIs$UMI), ]
+  
   # consensus_mean = list()
   # 
   # for(i in c(1:nrow(newUMIs))){
@@ -435,28 +444,34 @@ single <- function(filepath1,
   start.all <- proc.time()
   #File 1
   seq <- as.data.table(sread(reads1))
-  ids <- as.data.table(reads1@id)
+  ids <- as.data.table(id(reads1))
   
   full <- cbind(seq, ids)
   names(full) <- c("seq", "id")
   
   #separate UMI and read
-  full$UMI <- substring(full$seq, 1, UMIlength)
-  full$read <- substring(full$seq, UMIlength+1, sequenceLength)
+  full$UMI  <- substring(full$seq, 1, UMIlength)
+  full$read <- substring(full$seq, UMIlength + 1, sequenceLength)
   
-  full <- select(full, read, id, UMI)
-  colnames(full) <- c("read", "id", "UMI")
+  # full <- select(full, read, id, UMI)
+  # colnames(full) <- c("read", "id", "UMI")
+  
+  full = full[, c("read", "id", "UMI"), with = FALSE]
   
   
   #keep intermediate information 
-  partIDs <- as.data.table(cbind(UMI = full$UMI, ID1 = full$id))
-  partIDs <- partIDs[!duplicated(UMI),]
+  partIDs <- data.table(
+      "UMI" = full$UMI,
+      "ID1" = full$id
+  ) # as.data.table(cbind(UMI = full$UMI, ID1 = full$id))
+  
+  partIDs <- partIDs[which(!duplicated(UMI)),]
   partIDs <- partIDs[order(partIDs$UMI, decreasing = TRUE), ]
   
-  intermediate.table <- full[,.(count = .N),by=UMI,]
-  intermediate.table <- intermediate.table[order(intermediate.table$UMI, decreasing = TRUE), ]
+  intermediate.table     <- full[, by = UMI, .(count = .N)]
+  intermediate.table     <- intermediate.table[order(intermediate.table$UMI, decreasing = TRUE), ]
   intermediate.table$ID1 <- partIDs$ID1
-  intermediate.table <- intermediate.table[which(intermediate.table$count >= countsCutoff),]
+  intermediate.table     <- intermediate.table[which(intermediate.table$count >= countsCutoff),]
   
   rm(partIDs)
   memory[2] <-  mem_used()
@@ -464,36 +479,47 @@ single <- function(filepath1,
   
   #data preparation
   quality <- as(quality(reads1), "matrix")
-  quality = as.data.table(quality)
-  quality = quality[,(UMIlength+1):sequenceLength]
+  quality <- setDT(as.data.frame(quality))
+  quality <- quality[,(UMIlength + 1):sequenceLength]
   quality$id <- full$id
 
   rm(ids, seq, reads1)
   
   #first consensus
-  result_mean = groupingSingle(intermediate.table, # $UMI[i], 
-                                 # intermediate.table$count[i], 
-                                 full, 
-                                 quality,  
-                                 UMIlength)
+  result_mean = groupingSingle(
+      intermediate.table, # $UMI[i], 
+      # intermediate.table$count[i], 
+      full, 
+      quality,  
+      UMIlength
+  )
   
   memory[3] <-  mem_used()
   #UMI correction
-  newUMIs <- UMIcorrectionSingle(intermediate.table,
-                                   result_mean,
-                                   sequenceDistance, 
-                                   UMIdistance,
-                                   outputsFolder)
+  newUMIs <- UMIcorrectionSingle(
+      intermediate.table,
+      result_mean,
+      sequenceDistance, 
+      UMIdistance,
+      outputsFolder
+  )
   
   rm(intermediate.table)
   memory[4] <-  mem_used()
   #final consensus
-  consensus_mean = groupingFinalSingle(newUMIs, # i, 
-                                         full, 
-                                         quality, 
-                                         result_mean, 
-                                         UMIlength)
+  consensus_mean = groupingFinalSingle(
+      newUMIs, # i, 
+      full, 
+      quality, 
+      result_mean, 
+      UMIlength
+  )
+  
   memory[5] <-  mem_used()
+  
+  consensus_mean = consensus_mean[order(consensus_mean$UMI), ]
+  result_mean    = result_mean[order(result_mean$UMI), ]
+  newUMIs        = newUMIs[order(newUMIs$UMI), ]
   #first consensus
   #result_mean = list()
   
@@ -523,7 +549,7 @@ single <- function(filepath1,
   #produce Outputs 
   
   end.time <- Sys.time()
-  end.all <- proc.time()
+  end.all  <- proc.time()
   
   total.time.secs <- difftime(end.time,start.time,units = "secs")
   total.time.mins <- difftime(end.time,start.time,units = "mins")
@@ -543,6 +569,7 @@ single <- function(filepath1,
   
   line = paste0("Elapsed time: ", time.fifference[3])
   write(line, paste0(outputsFolder,"/extra_info.txt"), append = T)
+  
   line = paste0("Memory used at start: ", memory[1])
   write(line, paste0(outputsFolder,"/extra_info.txt"), append = T)
  
@@ -559,26 +586,36 @@ single <- function(filepath1,
   write(line, paste0(outputsFolder,"/extra_info.txt"), append = T)
   
   #File1
-  file <- ShortReadQ(DNAStringSet(consensus_mean$read1), 
-                     FastqQuality(consensus_mean$quality1),
-                     BStringSet(paste0(newUMIs$ID1," ",consensus_mean$UMI)))
+  file <- ShortReadQ(
+      DNAStringSet(consensus_mean$read1), 
+      FastqQuality(consensus_mean$quality1),
+      BStringSet(paste0(newUMIs$ID1, " ", consensus_mean$UMI))
+  )
   
   
-  fileSplit <- as.data.table(str_split(filepath1,"\\/"))
-  fileSplit <- as.data.table(str_split(fileSplit[nrow(fileSplit)],"\\."))
+  fileSplit <- setDT(str_split(filepath1, "\\/"))
+  fileSplit <- setDT(str_split(fileSplit[nrow(fileSplit)], "\\."))
+  
   output <- paste0(outputsFolder,"/", fileSplit[1], "_corrected.fastq.gz")
+  
   part <- fileSplit[1]
   file.create(output)
   writeFastq(file, output, mode = "a")
  
-  output.csv <- as.data.table(cbind(UMI = consensus_mean$UMI,
-                                    UMIs = newUMIs$UMI,
-                                    counts = newUMIs$Counts,
-                                    read1 = consensus_mean$read1,
-                                    quality1 = consensus_mean$quality1,
-                                    ID1 = paste0(newUMIs$ID1," ",consensus_mean$UMI)))
+  output.csv <- data.table(
+      "UMI"      = consensus_mean$UMI,
+      "UMIs"     = newUMIs$UMI,
+      "counts"   = newUMIs$Counts,
+      "read1"    = consensus_mean$read1,
+      "quality1" = consensus_mean$quality1,
+      "ID1"      = paste0(newUMIs$ID1," ",consensus_mean$UMI)
+  )
   
-  write.table(output.csv,paste0(outputsFolder,"/",part,"_summary_table.csv"), sep ="\t", row.names = F)
+  fwrite(
+      output.csv,
+      paste0(outputsFolder, "/", part,"_summary_table.csv"), 
+      sep = ",", row.names = F, quote = TRUE
+  )
  
   remove(part, file,output, fileSplit, output.csv)
   

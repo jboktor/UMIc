@@ -36,10 +36,10 @@ UMIdistance <- 1
 sequenceDistance <- 3
 
 #inputs folder / working directory
-inputsFolder <- "data//case3"
+inputsFolder <- "data/case3/"
 
 #outputs folder
-outputsFolder <- "results_case3"
+outputsFolder <- "UMIc_output_case3"
 
 ########## Run the appropriate scenario ##########
 
@@ -117,13 +117,15 @@ if (pairedData & UMIlocation == "R1"){   #case 1 -- paired data and UMI only in 
     
     filepath1 <- paste0(inputsFolder,"/",file1)
 
-    single(filepath1, 
-           outputsFolder, 
-           UMIlength, 
-           UMIdistance, 
-           sequenceLength, 
-           sequenceDistance, 
-           countsCutoff)
+    single(
+        filepath1, 
+        outputsFolder, 
+        UMIlength, 
+        UMIdistance, 
+        sequenceLength, 
+        sequenceDistance, 
+        countsCutoff
+    )
     
     inputFiles <- inputFiles[str_detect(inputFiles,file1, negate = T)]
   }
