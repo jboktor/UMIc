@@ -118,7 +118,8 @@ pairedR1 <- function(filepath1,
     
     consensus_mean = consensus_mean[order(consensus_mean$UMI), ]
     result_mean    = result_mean[order(result_mean$UMI), ]
-    newUMIs        = newUMIs[order(newUMIs$UMI), ]
+    newUMIs$key = str_sub(newUMIs$UMI, 1, UMIlength)
+    newUMIs        = newUMIs[order(newUMIs$key), ]
   # }
   
   # consensus_mean <- bind_rows(consensus_mean)
@@ -336,7 +337,8 @@ pairedR1R2 <- function(filepath1,
   
   consensus_mean = consensus_mean[order(consensus_mean$UMI), ]
   result_mean    = result_mean[order(result_mean$UMI), ]
-  newUMIs        = newUMIs[order(newUMIs$UMI), ]
+  newUMIs$key = str_sub(newUMIs$UMI, 1, UMIlength)
+  newUMIs        = newUMIs[order(newUMIs$key), ]
   
   # consensus_mean = list()
   # 
@@ -519,7 +521,9 @@ single <- function(filepath1,
   
   consensus_mean = consensus_mean[order(consensus_mean$UMI), ]
   result_mean    = result_mean[order(result_mean$UMI), ]
-  newUMIs        = newUMIs[order(newUMIs$UMI), ]
+  
+  newUMIs$key = str_sub(newUMIs$UMI, 1, UMIlength)
+  newUMIs        = newUMIs[order(newUMIs$key), ]
   #first consensus
   #result_mean = list()
   
