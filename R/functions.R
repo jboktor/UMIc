@@ -35,7 +35,7 @@ groupingPairedR1 <- function(intermediate.table, # r1,
       qr2 = base::apply(qr2, 1, intToUtf8)
       qr2 = as.character(qr2)
       
-      result.1 = data.table(UMI = f1$UMI12,
+      result.1 = data.table(UMI = f1$UMI,
                             read1 = f1$read, quality1 = qr1, 
                             read2 = f2$read, quality2 = qr2)
       
@@ -264,8 +264,9 @@ groupingSingle <- function(intermediate.table, # r1,
       qr1 = base::apply(qr1, 1, intToUtf8)
       qr1 = as.character(qr1)
       
-      result.1 = data.table(UMI = f1$UMI12,
-                            read1 = f1$read, quality1 = qr1)
+      result.1 = data.table(UMI = f1$UMI,
+                            read1 = f1$read, 
+                            quality1 = qr1)
       
       colnames(result.1) = c("UMI" , "read1", "quality1")
       
