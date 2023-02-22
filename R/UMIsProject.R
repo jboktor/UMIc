@@ -1,3 +1,6 @@
+
+
+
 ########## Loading libraries ########## 
 library(tidyverse)
 library(data.table)
@@ -14,32 +17,37 @@ source("R/functions.R")
 ########## Inputs ##########
 
 #type of data - paired or single
-pairedData <- F
+pairedData <- TRUE
 
 #UMI located in Read1 --> "R1"
 #UMI located in Read1 and Read2 --> "R1 & R2"
-UMIlocation <- "R1"
+UMIlocation <- "R1 & R2"
 
 #length of the UMI
-UMIlength <- 12
+UMIlength <- 5
 
 #length of th sequence
-sequenceLength <- 251
+sequenceLength <- 150
 
 #min read counts per UMI, for initial data cleaning
-countsCutoff <- 5
+countsCutoff <- 1
 
 #max UMI distance for UMI merging
 UMIdistance <- 1
 
 #max sequence distance for UMI correction
-sequenceDistance <- 3
+sequenceDistance <- 10
 
 #inputs folder / working directory
-inputsFolder <- "data/case3/"
+inputsFolder <- "test/"
 
 #outputs folder
-outputsFolder <- "UMIc_output_case3"
+outputsFolder <- paste(
+    str_replace_all(
+        str_split(Sys.time(), "\\ ", simplify = TRUE)[, 1:2], 
+        "\\:", "."
+    ), collapse = "_"
+)
 
 ########## Run the appropriate scenario ##########
 

@@ -434,8 +434,8 @@ groupingFinalPairedR1R2 <- function(newUMIs, # r1,
                                     first_consensus, 
                                     UMIlength){
   
-  newUMIs.1 = newUMIs[which(str_length(newUMIs$UMI) == 2*UMIlength), ]
-  newUMIs.2 = newUMIs[which(str_length(newUMIs$UMI) != 2*UMIlength), ]
+  newUMIs.1 = newUMIs[which(str_length(newUMIs$UMI) == 2 * UMIlength), ]
+  newUMIs.2 = newUMIs[which(str_length(newUMIs$UMI) != 2 * UMIlength), ]
   
   rm(newUMIs)
   
@@ -739,7 +739,8 @@ UMIcorrectionPairedR1R2 <- function(intermediate.table,
     base_dist2 = stringdist::stringdistmatrix(a = best.UMI2,
                                               b = temp.UMI2,
                                               method = "hamming")[1,]
-    dist.calc <- dist.calc +length(base_dist1) +length(base_dist2)
+    
+    dist.calc <- dist.calc +length(base_dist1) + length(base_dist2)
     
     
     who = which((base_dist1 <= UMIdistance) & (base_dist2 <= UMIdistance))
@@ -757,17 +758,20 @@ UMIcorrectionPairedR1R2 <- function(intermediate.table,
       dist2 = stringdist::stringdistmatrix(a = best$read2[1], 
                                            b = temp_read2, 
                                            method = "hamming")[1,]
-      dist.calc <- dist.calc +length(dist1) +length(dist2)
+      
+      dist.calc <- dist.calc +length(dist1) + length(dist2)
       
       who = which((dist1 <= sequenceDistance) & (dist2 <= sequenceDistance))
       
       if(length(who) > 0){
+          
         temp.intermediate = temp.intermediate[who,]
         list.best.UMI = c(list.best.UMI, temp.intermediate$UMI12)
         list.counts = c(list.counts, temp.intermediate$count)
         
         list.best.UMI = paste(list.best.UMI, collapse = "|")
         list.counts = paste(list.counts, collapse = "|")
+        
       }
     }
     
@@ -806,7 +810,7 @@ UMIcorrectionPairedR1R2 <- function(intermediate.table,
     uniqueUMIs <- append(uniqueUMIs, list.best.UMI)
   
     intermediate.table <- intermediate.table[str_detect(intermediate.table$UMI12, as.character(list.best.UMI), 
-                                                        negate = T), ]
+                                                        negate = TRUE), ]
     
   }
   

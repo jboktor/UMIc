@@ -287,6 +287,12 @@ pairedR1R2 <- function(filepath1,
   
   cat("step 1\n")
   
+  intermediate.table = setDT(intermediate.table)
+  full               = setDT(full)
+  full2              = setDT(full2)
+  quality            = setDT(quality)
+  quality2           = setDT(quality2)
+  
   result_mean = groupingPairedR1R2(intermediate.table, 
                                    full,
                                    quality,
@@ -337,7 +343,8 @@ pairedR1R2 <- function(filepath1,
   
   consensus_mean = consensus_mean[order(consensus_mean$UMI), ]
   result_mean    = result_mean[order(result_mean$UMI), ]
-  newUMIs$key = str_sub(newUMIs$UMI, 1, UMIlength)
+  
+  newUMIs$key    = str_sub(newUMIs$UMI, 1, 2 * UMIlength)
   newUMIs        = newUMIs[order(newUMIs$key), ]
   
   # consensus_mean = list()
@@ -386,6 +393,7 @@ pairedR1R2 <- function(filepath1,
   
   line = paste0("Memory used after second consensus: ", memory[5])
   write(line, paste0(outputsFolder,"/extra_info.txt"), append = T)
+  
   file <- ShortReadQ(DNAStringSet(consensus_mean$read1), 
                      FastqQuality(consensus_mean$quality1),
                      BStringSet(paste0(newUMIs$ID1, " ", substring(consensus_mean$UMI, 1, UMIlength))))
