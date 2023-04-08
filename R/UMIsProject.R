@@ -11,9 +11,6 @@ library(pryr)
 
 rm(list = ls())
 
-wkdir <- getwd()
-source(paste0(wkdir, "/R/casesWorkflows.R"))
-source(paste0(wkdir, "/R/functions.R"))
 
 
 ########## Inputs ##########
